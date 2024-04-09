@@ -1,0 +1,2 @@
+# BashProject
+Bash project - automation 
