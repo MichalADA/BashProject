@@ -39,7 +39,7 @@ while true; do
                             read -p "Czy chcesz, aby użytkownik miał uprawnienia sudo? (tak/nie): " answer
                             case $answer in
                                 tak|yes)
-                                    usermod -aG wheel "$username"
+                                    usermod -aG sudo "$username"
                                     echo "Dodano użytkownika do grupy sudo."
                                     break
                                     ;;
@@ -92,7 +92,70 @@ while true; do
                 break
                 ;;
             4)
-                echo "Tutaj będzie kod do zarządzania grupami"
+                # Zarządzanie grupami
+                while true; do
+                    echo "Menu zarządzania grupami:"
+                    echo "1) Tworzenie grupy"
+                    echo "2) Wyświetlenie listy grup"
+                    echo "3) Usuwanie grupy"
+                    echo "4) Dodanie użytkownika do grupy"
+                    echo "5) Powrót do głównego menu"
+                    read -p "Wybierz opcję: " opcja
+
+                    case $opcja in
+                        1)
+                            read -p "Podaj nazwę grupy do utworzenia: " group_name
+                            sudo groupadd "$group_name"
+                            if [ $? -eq 0 ]; then
+                                echo "Grupa '$group_name' została pomyślnie utworzona."
+                            else
+                                echo "Wystąpił problem podczas tworzenia grupy '$group_name'."
+                            fi
+                            ;;
+                        2)
+                            echo "Lista grup:"
+                            cut -d: -f1 /etc/group
+                            ;;
+                        3)
+                            read -p "Podaj nazwę grupy do usunięcia: " group_name
+                            sudo groupdel "$group_name"
+                            if [ $? -eq 0 ]; then
+                                echo "Grupa '$group_name' została pomyślnie usunięta."
+                            else
+                                echo "Wystąpił problem podczas usuwania grupy '$group_name'."
+                            fi
+                            ;;
+                        4)
+                              # List all available users
+                            echo "Lista dostępnych użytkowników:"
+                            cut -d: -f1 /etc/passwd | nl
+                            echo "------------------------------"
+                            
+                            read -p "Podaj nazwę użytkownika do dodania: " user_name
+                            
+                            # List available groups without line numbers
+                            echo "Lista dostępnych grup:"
+                            cut -d: -f1 /etc/group
+                            echo "------------------------------"
+                            
+                            read -p "Podaj nazwę grupy, do której dodać użytkownika: " group_name
+                            
+                            # Add the user to the selected group
+                            sudo usermod -aG "$group_name" "$user_name"
+                            
+                            if [ $? -eq 0 ]; then
+                                echo "Użytkownik '$user_name' został pomyślnie dodany do grupy '$group_name'."
+                            else
+                                echo "Wystąpił problem podczas dodawania użytkownika '$user_name' do grupy '$group_name'."
+                            fi
+                            
+                            break # Powrót do głównego menu
+                            ;;
+                        *)
+                            echo "Niewłaściwy wybór, spróbuj ponownie."
+                            ;;
+                    esac
+                done
                 break
                 ;;
             5)
@@ -105,3 +168,4 @@ while true; do
         esac
     done
 done
+
